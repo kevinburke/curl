@@ -206,6 +206,8 @@ static CURLcode status_line(struct Curl_easy *data,
   size_t wrote;
   size_t len;
   const char *vstr;
+  if(http_version == HYPER_HTTP_VERSION_NONE)
+      return CURLE_UNSUPPORTED_PROTOCOL;
   curl_write_callback writeheader =
     data->set.fwrite_header? data->set.fwrite_header: data->set.fwrite_func;
   vstr = http_version == HYPER_HTTP_VERSION_1_1 ? "1.1" :
@@ -311,6 +313,9 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
         /* override Hyper's view, might not even be an error */
         result = data->state.hresult;
         infof(data, "hyperstream is done (by early callback)\n");
+      }
+      else if(errnum == HYPERE_INVALID_HTTP_VERSION) {
+        result = CURLE_UNSUPPORTED_PROTOCOL;
       }
       else {
         uint8_t errbuf[256];
