@@ -232,12 +232,14 @@ static CURLcode status_line(struct Curl_easy *data,
   len = Curl_dyn_len(&data->state.headerb);
   Curl_debug(data, CURLINFO_HEADER_IN, Curl_dyn_ptr(&data->state.headerb),
              len);
-  Curl_set_in_callback(data, true);
-  wrote = writeheader(Curl_dyn_ptr(&data->state.headerb), 1, len,
-                      data->set.writeheader);
-  Curl_set_in_callback(data, false);
-  if(wrote != len)
-    return CURLE_WRITE_ERROR;
+  if(data->set.fwrite_header || data->set.writeheader) {
+    Curl_set_in_callback(data, true);
+    wrote = writeheader(Curl_dyn_ptr(&data->state.headerb), 1, len,
+                        data->set.writeheader);
+    Curl_set_in_callback(data, false);
+    if(wrote != len)
+      return CURLE_WRITE_ERROR;
+  }
 
   data->info.header_size += (long)len;
   data->req.headerbytecount += (long)len;
