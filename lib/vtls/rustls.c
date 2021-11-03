@@ -309,10 +309,10 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
   config_builder = rustls_client_config_builder_new();
 #ifdef USE_HTTP2
   infof(data, "offering ALPN for HTTP/1.1 and HTTP/2");
-  rustls_client_config_builder_set_protocols(config_builder, alpn, 2);
+  rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 2);
 #else
   infof(data, "offering ALPN for HTTP/1.1 only");
-  rustls_client_config_builder_set_protocols(config_builder, alpn, 1);
+  rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 1);
 #endif
   if(!verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
@@ -357,7 +357,7 @@ cr_set_negotiated_alpn(struct Curl_easy *data, struct connectdata *conn,
   const uint8_t *protocol = NULL;
   size_t len = 0;
 
-  rustls_connection_get_alpn_protocol(rconn, &protocol, &len);
+  rustls_connection_alpn_protocol(rconn, &protocol, &len);
   if(NULL == protocol) {
     infof(data, "ALPN, server did not agree to a protocol");
     return;
