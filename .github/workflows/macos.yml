@@ -1,15 +1,6 @@
 name: macOS
 
-on:
-  # Trigger the workflow on push or pull requests, but only for the
-  # master branch
-  push:
-    branches:
-    - master
-    - '*/ci'
-  pull_request:
-    branches:
-    - master
+on: push
 
 jobs:
   autotools:
@@ -70,7 +61,13 @@ jobs:
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
 
-    - run: brew update && brew bundle install --no-lock --file /tmp/Brewfile
+    - run: cat /tmp/Brewfile
+      name: debugging step
+
+    - run: test -r /usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask
+      name: ensure directory readable
+
+    - run: brew update && brew bundle install --verbose --no-lock --file /tmp/Brewfile
       name: 'brew install'
 
     - uses: actions/checkout@v2
